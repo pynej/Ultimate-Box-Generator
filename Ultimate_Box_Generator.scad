@@ -143,8 +143,8 @@ CubeFaces = [
   [7,4,0,3]]; // left
 
 function calc_number_struts(x, y, pivot, width, rotation) = ( rotation/90*(pivot?y:x) + (1-rotation/90)*(pivot?x:y)  - mesh_inset_padding*2) / width - 1;
-function calc_size(repeat, comp_size) = repeat * (comp_size + internal_wall) - internal_wall + wall*2;
-function calc_offset(repeat, comp_size) = repeat * (comp_size + internal_wall) + wall;
+function calc_size(repeat, comp_size, internal_wall=internal_wall, wall=wall) = repeat * (comp_size + internal_wall) - internal_wall + wall*2;
+function calc_offset(repeat, comp_size, internal_wall=internal_wall, wall=wall) = repeat * (comp_size + internal_wall) + wall;
 function calc_rotation(rotation, size_x, size_y) = rotation / 180 - floor(rotation / 180) >= .25 && rotation / 180 - floor(rotation / 180) < .75 ? size_y : size_x;
 function make_object(x, y, z, offset_x, offset_y, repeat_x, repeat_y, color) = [
     [x, y, z],
@@ -186,7 +186,7 @@ module make_wall(row, offset, rotate, internal_size_deep=internal_size_deep, int
 }
 
 /*** Code used in make_mesh to create complex struts that may be reused elsewhere. ***/
-module make_struts (x, y, thickness, number_of_struts, struts_width, angle) {
+module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh_type) {
 	angle2 = angle % 180;
 	hypotenuse = sqrt(pow(x,2)+pow(y,2)); //lenght of the diagonal
 	number_of_struts = mesh_type == 5 ? 0 : floor(number_of_struts);
@@ -271,7 +271,7 @@ module make_struts (x, y, thickness, number_of_struts, struts_width, angle) {
 }
 
 /*** Code to create complex mesh and other cutouts in the box walls. ***/
-module make_mesh(width, height, rotation, pivot=false, inverted=false) {
+module make_mesh(width, height, rotation, mesh_type, pivot=false, inverted=false) {
     if(mesh_type != 0) {
 //        pivot = mesh_type == 6 ? false : pivot;
         num_strut=max(strut_count_min, calc_number_struts(width, height, !pivot, strut_width + strut_gap, rotation));
@@ -996,7 +996,7 @@ module make_lid() {
     }
 }
 /*** Mesh in the lid needs some custom logic. ***/
-module make_lid_mesh(x, y) {
+module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y, comp_size_x, comp_size_y, mesh_type) {
     //top mesh
     if(mesh_do_top) {
         mesh_x=box_x - wall*2  - tolerance - mesh_inset_padding*2;
