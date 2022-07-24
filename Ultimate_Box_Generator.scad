@@ -271,7 +271,7 @@ module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh
 }
 
 /*** Code to create complex mesh and other cutouts in the box walls. ***/
-module make_mesh(width, height, rotation, mesh_type, pivot=false, inverted=false) {
+module make_mesh(width, height, rotation, mesh_type=mesh_type, pivot=false, inverted=false) {
     if(mesh_type != 0) {
 //        pivot = mesh_type == 6 ? false : pivot;
         num_strut=max(strut_count_min, calc_number_struts(width, height, !pivot, strut_width + strut_gap, rotation));
@@ -426,7 +426,7 @@ module make_box() {
                                     //x- mesh
                                     rotate([0,-90, 0])
                                     translate([mesh_inset_padding, mesh_inset_padding, - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, true, mesh_type=mesh_type);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, true);
                                     
                                 }
                                     
@@ -434,7 +434,7 @@ module make_box() {
                                     //x+ mesh
                                     rotate([0,90, 0])
                                     translate([mesh_inset_padding - comp_size_deep+wall*(lid_type==5?1:0), mesh_inset_padding, comp_size_x - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, true, mesh_type=mesh_type);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, true);
                                 }
                             }
                         }
@@ -649,7 +649,7 @@ module make_internal_box(comp_size_x, comp_size_y, comp_size_z) {
 }
 
 /*** Code used to create the internal structure of boxes. ***/
-module make_box_internal() {
+module make_box_internal(comp_size_x=comp_size_x, comp_size_y=comp_size_y, internal_size_deep=internal_size_deep, internal_type=internal_type, repeat_x=repeat_x, repeat_y=repeat_y, internal_fn=internal_fn, internal_rotate=internal_rotate, wall=wall, internal_wall=internal_wall) {
     for ( ybox = [ 0 : repeat_y - 1])
     {
         for( xbox = [ 0 : repeat_x - 1])
