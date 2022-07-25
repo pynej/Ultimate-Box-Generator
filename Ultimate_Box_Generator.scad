@@ -181,12 +181,12 @@ module make_wall(row, offset, rotate, internal_size_deep=internal_size_deep, int
         cube([rotate ? comp_size_x : internal_wall, rotate ? internal_wall : comp_size_y, internal_size_deep]);
         rotate([rotate ? 90 : 0, rotate ? 0 : -90, 0])
         translate([mesh_inset_padding, mesh_inset_padding, - .5-internal_wall])
-        make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, !rotate);
+	  make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, mesh_type=mesh_type, !rotate);
     }
 }
 
 /*** Code used in make_mesh to create complex struts that may be reused elsewhere. ***/
-module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh_type) {
+module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh_type=mesh_type) {
 	angle2 = angle % 180;
 	hypotenuse = sqrt(pow(x,2)+pow(y,2)); //lenght of the diagonal
 	number_of_struts = mesh_type == 5 ? 0 : floor(number_of_struts);
@@ -426,7 +426,7 @@ module make_box() {
                                     //x- mesh
                                     rotate([0,-90, 0])
                                     translate([mesh_inset_padding, mesh_inset_padding, - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, true);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, pivot=true);
                                     
                                 }
                                     
@@ -434,7 +434,7 @@ module make_box() {
                                     //x+ mesh
                                     rotate([0,90, 0])
                                     translate([mesh_inset_padding - comp_size_deep+wall*(lid_type==5?1:0), mesh_inset_padding, comp_size_x - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, true);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, pivot=true);
                                 }
                             }
                         }
@@ -1026,7 +1026,7 @@ module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y,
                     }
                     
                     translate([offset_x , offset_y, - oversize])
-                    make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, inverted=true, mesh_type=mesh_type);
+                    make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, mesh_type=mesh_type, inverted=true);
                             
                     if (has_coinslot==true) {        
                         translate([
