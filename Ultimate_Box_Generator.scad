@@ -70,6 +70,7 @@ has_coinslot=false; // Add slot in the top for dropping in components.
 has_snap=true; // Add small ridges or snaps to lids to help keep them closed.
 coinslot_x=20;	// Size in X direction
 coinslot_y=2.5;	// Size in Y direction
+coinslot_corner_radius=0; // rounded coinslot corners if >0; best if less than half the shorter coinslot dimension
 z_tolerance=0;   // Z tolerance can be tweaked separately, to make the top of the sliding lid be flush with the top of the box itself.
 extra_bottom=.15; // Extra bottm wall height to fit type 4 slider.
 hinge_inset=.75; // Size of the hinge connection.
@@ -950,7 +951,21 @@ module make_lid() {
                                 xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, 
                                 yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, 
                                 - oversize])
-                            cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
+                                intersection() {
+                                    cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
+                                    if (coinslot_corner_radius > 0) {
+                                        hull() {
+                                           translate([coinslot_corner_radius, coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                           translate([coinslot_x - coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                           translate([coinslot_x - coinslot_corner_radius, coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                           translate([coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                        }
+                                    }
+                                }
                         }
                     }
                 }
