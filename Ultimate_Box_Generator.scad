@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.6.1");
+echo("Built using Ultimate Box Generator v3.6.2");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
@@ -946,10 +946,10 @@ module make_lid() {
                     {
                         for( xslot = [ 0 : repeat_x - 1])
                         {
-                            translate([
-                                xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2,
-                                yslot * ( comp_size_y + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_y-coinslot_y)/2,
-                                -oversize])
+                            translate([ 
+                                xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, 
+                                yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, 
+                                - oversize])
                             cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
                         }
                     }
@@ -1029,10 +1029,10 @@ module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y,
                     make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, mesh_type=mesh_type, inverted=true);
                             
                     if (has_coinslot==true) {        
-                        translate([
-                            xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5,
-                            ybox * ( comp_size_y + wall ) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -2.5,
-                            -oversize])
+                        translate([ 
+                            xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, 
+                            ybox * ( comp_size_y + wall ) + wall*(2-3/2) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -4, 
+                            - oversize])
                         // The 2.5 above is hardcoded because of the 5 hardcoded here.
                         cube ( size = [ coinslot_x +5, coinslot_y +5, wall + oversize*2 ]);
                     }
