@@ -5,4 +5,4 @@ This is the repo for the Ultimate Box Generator on Thingiverse
 
 https://creativecommons.org/licenses/by/4.0/
 
-Contributors: Jeremy Pyne (https://github.com/pynej)
+Contributors: Jeremy Pyne (https://github.com/pynej), https://github.com/wjcarpenter
