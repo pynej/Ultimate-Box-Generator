@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.6.1");
+echo("Built using Ultimate Box Generator v3.6.2");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
@@ -143,8 +143,8 @@ CubeFaces = [
   [7,4,0,3]]; // left
 
 function calc_number_struts(x, y, pivot, width, rotation) = ( rotation/90*(pivot?y:x) + (1-rotation/90)*(pivot?x:y)  - mesh_inset_padding*2) / width - 1;
-function calc_size(repeat, comp_size) = repeat * (comp_size + internal_wall) - internal_wall + wall*2;
-function calc_offset(repeat, comp_size) = repeat * (comp_size + internal_wall) + wall;
+function calc_size(repeat, comp_size, internal_wall=internal_wall, wall=wall) = repeat * (comp_size + internal_wall) - internal_wall + wall*2;
+function calc_offset(repeat, comp_size, internal_wall=internal_wall, wall=wall) = repeat * (comp_size + internal_wall) + wall;
 function calc_rotation(rotation, size_x, size_y) = rotation / 180 - floor(rotation / 180) >= .25 && rotation / 180 - floor(rotation / 180) < .75 ? size_y : size_x;
 function make_object(x, y, z, offset_x, offset_y, repeat_x, repeat_y, color) = [
     [x, y, z],
@@ -181,12 +181,12 @@ module make_wall(row, offset, rotate, internal_size_deep=internal_size_deep, int
         cube([rotate ? comp_size_x : internal_wall, rotate ? internal_wall : comp_size_y, internal_size_deep]);
         rotate([rotate ? 90 : 0, rotate ? 0 : -90, 0])
         translate([mesh_inset_padding, mesh_inset_padding, - .5-internal_wall])
-        make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, !rotate);
+	  make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, mesh_type=mesh_type, !rotate);
     }
 }
 
 /*** Code used in make_mesh to create complex struts that may be reused elsewhere. ***/
-module make_struts (x, y, thickness, number_of_struts, struts_width, angle) {
+module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh_type=mesh_type) {
 	angle2 = angle % 180;
 	hypotenuse = sqrt(pow(x,2)+pow(y,2)); //lenght of the diagonal
 	number_of_struts = mesh_type == 5 ? 0 : floor(number_of_struts);
@@ -271,7 +271,7 @@ module make_struts (x, y, thickness, number_of_struts, struts_width, angle) {
 }
 
 /*** Code to create complex mesh and other cutouts in the box walls. ***/
-module make_mesh(width, height, rotation, pivot=false, inverted=false) {
+module make_mesh(width, height, rotation, mesh_type=mesh_type, pivot=false, inverted=false) {
     if(mesh_type != 0) {
 //        pivot = mesh_type == 6 ? false : pivot;
         num_strut=max(strut_count_min, calc_number_struts(width, height, !pivot, strut_width + strut_gap, rotation));
@@ -426,7 +426,7 @@ module make_box() {
                                     //x- mesh
                                     rotate([0,-90, 0])
                                     translate([mesh_inset_padding, mesh_inset_padding, - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, true, mesh_type=mesh_type);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, pivot=true);
                                     
                                 }
                                     
@@ -434,7 +434,7 @@ module make_box() {
                                     //x+ mesh
                                     rotate([0,90, 0])
                                     translate([mesh_inset_padding - comp_size_deep+wall*(lid_type==5?1:0), mesh_inset_padding, comp_size_x - oversize])
-                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, true, mesh_type=mesh_type);
+                                    make_mesh(comp_size_deep-wall*(lid_type==5?1:0), comp_size_y, mesh_rotation, mesh_type=mesh_type, pivot=true);
                                 }
                             }
                         }
@@ -649,7 +649,7 @@ module make_internal_box(comp_size_x, comp_size_y, comp_size_z) {
 }
 
 /*** Code used to create the internal structure of boxes. ***/
-module make_box_internal() {
+module make_box_internal(comp_size_x=comp_size_x, comp_size_y=comp_size_y, internal_size_deep=internal_size_deep, internal_type=internal_type, repeat_x=repeat_x, repeat_y=repeat_y, internal_fn=internal_fn, internal_rotate=internal_rotate, wall=wall, internal_wall=internal_wall) {
     for ( ybox = [ 0 : repeat_y - 1])
     {
         for( xbox = [ 0 : repeat_x - 1])
@@ -946,7 +946,10 @@ module make_lid() {
                     {
                         for( xslot = [ 0 : repeat_x - 1])
                         {
-                            translate([ xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, - oversize])
+                            translate([ 
+                                xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, 
+                                yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, 
+                                - oversize])
                             cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
                         }
                     }
@@ -996,7 +999,7 @@ module make_lid() {
     }
 }
 /*** Mesh in the lid needs some custom logic. ***/
-module make_lid_mesh(x, y) {
+module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y, comp_size_x, comp_size_y, mesh_type) {
     //top mesh
     if(mesh_do_top) {
         mesh_x=box_x - wall*2  - tolerance - mesh_inset_padding*2;
@@ -1023,10 +1026,14 @@ module make_lid_mesh(x, y) {
                     }
                     
                     translate([offset_x , offset_y, - oversize])
-                    make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, inverted=true, mesh_type=mesh_type);
+                    make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, mesh_type=mesh_type, inverted=true);
                             
                     if (has_coinslot==true) {        
-                        translate([ xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, ybox * ( comp_size_y + wall ) + wall*(2-3/2) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -4, - oversize])
+                        translate([ 
+                            xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, 
+                            ybox * ( comp_size_y + wall ) + wall*(2-3/2) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -4, 
+                            - oversize])
+                        // The 2.5 above is hardcoded because of the 5 hardcoded here.
                         cube ( size = [ coinslot_x +5, coinslot_y +5, wall + oversize*2 ]);
                     }
                 }
