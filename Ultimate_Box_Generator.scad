@@ -1064,7 +1064,8 @@ module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y,
                     if (has_coinslot==true) {        
                         translate([
                             xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, 
-                            ybox * ( comp_size_y + wall ) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -2.5])
+                            ybox * ( comp_size_y + wall ) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -2.5,
+                            - oversize])
                         // The 2.5 above is hardcoded because of the 5 hardcoded here.
                         cube ( size = [ coinslot_x +5, coinslot_y +5, wall + oversize*2 ]);
                     }
