@@ -156,7 +156,23 @@ function make_object(x, y, z, offset_x, offset_y, repeat_x, repeat_y, color) = [
     [color]
 ];
 
-/*** More complex module that itterates through complex_box to create many boxes. ***/
+function calc_coinslot_wall_offset_multiplier_x() = (
+                                    lid_type == 1 ? 1.0
+                                   :lid_type == 2 ? 1.0
+                                   :lid_type == 3 ? 1.0
+                                   :lid_type == 4 ? 1.0
+                                   :lid_type == 5 ? 2.0
+                                   : 1.0);
+
+function calc_coinslot_wall_offset_multiplier_y() = (
+                                    lid_type == 1 ? 0.5
+                                   :lid_type == 2 ? 0.5
+                                   :lid_type == 3 ? 1.0
+                                   :lid_type == 4 ? 0.5
+                                   :lid_type == 5 ? 2.0
+                                   : 1.0);
+
+/*** More complex module that iterates through complex_box to create many boxes. ***/
 module make_complex_box() {
     intersection() {     
         translate([wall, wall, wall])
@@ -942,14 +958,15 @@ module make_lid() {
                         }
                 }
             
+                // This is the coinslot opening to be removed
                 if (has_coinslot==true) {
                     for ( yslot = [ 0 : repeat_y - 1])
                     {
                         for( xslot = [ 0 : repeat_x - 1])
                         {
                             translate([ 
-                                xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, 
-                                yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, 
+                                xslot * ( comp_size_x + wall ) + (calc_coinslot_wall_offset_multiplier_x())*wall + (comp_size_x-coinslot_x)/2, 
+                                yslot * ( comp_size_y + wall ) + (calc_coinslot_wall_offset_multiplier_y())*wall + (comp_size_y-coinslot_y)/2, 
                                 - oversize])
                                 intersection() {
                                     cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
@@ -1043,10 +1060,11 @@ module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y,
                     translate([offset_x , offset_y, - oversize])
                     make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, mesh_type=mesh_type, inverted=true);
                             
+                    // This is the solid box around the coinslot opening
                     if (has_coinslot==true) {        
-                        translate([ 
+                        translate([
                             xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, 
-                            ybox * ( comp_size_y + wall ) + wall*(2-3/2) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -4, 
+                            ybox * ( comp_size_y + wall ) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -2.5,
                             - oversize])
                         // The 2.5 above is hardcoded because of the 5 hardcoded here.
                         cube ( size = [ coinslot_x +5, coinslot_y +5, wall + oversize*2 ]);
