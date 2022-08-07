@@ -964,22 +964,26 @@ module make_lid() {
                     {
                         for( xslot = [ 0 : repeat_x - 1])
                         {
+                                offset_x=calc_offset(xslot, comp_size_x, internal_wall=internal_wall, wall=wall);
+                                offset_y=calc_offset(yslot, comp_size_y, internal_wall=internal_wall, wall=wall);
+                            
+                            translate([lid_type == 5 ? wall + tolerance : -tolerance,  lid_type == 5  ? wall + tolerance : (lid_type != 3 ? -wall/2-tolerance : tolerance) , lid_type == 4 ? extra_bottom : 0])
                             translate([ 
-                                xslot * ( comp_size_x + wall ) + (calc_coinslot_wall_offset_multiplier_x())*wall + (comp_size_x-coinslot_x)/2, 
-                                yslot * ( comp_size_y + wall ) + (calc_coinslot_wall_offset_multiplier_y())*wall + (comp_size_y-coinslot_y)/2, 
+                            comp_size_x/2 + offset_x - (coinslot_x)/2,
+                            comp_size_y/2 + offset_y -  (coinslot_y)/2, 
                                 - oversize])
                                 intersection() {
                                     cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
                                     if (coinslot_corner_radius > 0) {
                                         hull() {
                                            translate([coinslot_corner_radius, coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
                                            translate([coinslot_x - coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
                                            translate([coinslot_x - coinslot_corner_radius, coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
                                            translate([coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius);
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
                                         }
                                     }
                                 }
