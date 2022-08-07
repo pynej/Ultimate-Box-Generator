@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.6.2");
+echo("Built using Ultimate Box Generator v3.7.0");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
@@ -70,6 +70,7 @@ has_coinslot=false; // Add slot in the top for dropping in components.
 has_snap=true; // Add small ridges or snaps to lids to help keep them closed.
 coinslot_x=20;	// Size in X direction
 coinslot_y=2.5;	// Size in Y direction
+coinslot_corner_radius=0; // rounded coinslot corners if >0; best if less than half the shorter coinslot dimension
 z_tolerance=0;   // Z tolerance can be tweaked separately, to make the top of the sliding lid be flush with the top of the box itself.
 extra_bottom=.15; // Extra bottm wall height to fit type 4 slider.
 hinge_inset=.75; // Size of the hinge connection.
@@ -155,7 +156,7 @@ function make_object(x, y, z, offset_x, offset_y, repeat_x, repeat_y, color) = [
     [color]
 ];
 
-/*** More complex module that itterates through complex_box to create many boxes. ***/
+/*** More complex module that iterates through complex_box to create many boxes. ***/
 module make_complex_box() {
     intersection() {     
         translate([wall, wall, wall])
@@ -941,16 +942,35 @@ module make_lid() {
                         }
                 }
             
+                // This is the coinslot opening to be removed
                 if (has_coinslot==true) {
                     for ( yslot = [ 0 : repeat_y - 1])
                     {
                         for( xslot = [ 0 : repeat_x - 1])
                         {
+                                offset_x=calc_offset(xslot, comp_size_x, internal_wall=internal_wall, wall=wall);
+                                offset_y=calc_offset(yslot, comp_size_y, internal_wall=internal_wall, wall=wall);
+                            
+                            translate([lid_type == 5 ? wall + tolerance : -tolerance,  lid_type == 5  ? wall + tolerance : (lid_type != 3 ? -wall/2-tolerance : tolerance) , lid_type == 4 ? extra_bottom : 0])
                             translate([ 
-                                xslot * ( comp_size_x + wall ) + (2-(lid_type==5 ? 0 : 1))*wall + (comp_size_x-coinslot_x)/2, 
-                                yslot * ( comp_size_y + wall ) + wall*(2-3*(lid_type==5?0:1)/2) + (comp_size_y-coinslot_y)/2, 
+                            comp_size_x/2 + offset_x - (coinslot_x)/2,
+                            comp_size_y/2 + offset_y -  (coinslot_y)/2, 
                                 - oversize])
-                            cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
+                                intersection() {
+                                    cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
+                                    if (coinslot_corner_radius > 0) {
+                                        hull() {
+                                           translate([coinslot_corner_radius, coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                           translate([coinslot_x - coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                           translate([coinslot_x - coinslot_corner_radius, coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                           translate([coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                        }
+                                    }
+                                }
                         }
                     }
                 }
@@ -1028,10 +1048,11 @@ module make_lid_mesh(x, y, internal_wall=internal_wall, wall=wall, box_x, box_y,
                     translate([offset_x , offset_y, - oversize])
                     make_mesh(comp_size_x, comp_size_y, mesh_alt_rotation, mesh_type=mesh_type, inverted=true);
                             
+                    // This is the solid box around the coinslot opening
                     if (has_coinslot==true) {        
-                        translate([ 
+                        translate([
                             xbox * ( comp_size_x + wall ) + (comp_size_x-coinslot_x)/2 -mesh_inset_padding -2.5, 
-                            ybox * ( comp_size_y + wall ) + wall*(2-3/2) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -4, 
+                            ybox * ( comp_size_y + wall ) + (comp_size_y-coinslot_y)/2 -mesh_inset_padding -2.5,
                             - oversize])
                         // The 2.5 above is hardcoded because of the 5 hardcoded here.
                         cube ( size = [ coinslot_x +5, coinslot_y +5, wall + oversize*2 ]);
