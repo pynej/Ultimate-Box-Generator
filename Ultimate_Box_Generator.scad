@@ -156,22 +156,6 @@ function make_object(x, y, z, offset_x, offset_y, repeat_x, repeat_y, color) = [
     [color]
 ];
 
-function calc_coinslot_wall_offset_multiplier_x() = (
-                                    lid_type == 1 ? 1.0
-                                   :lid_type == 2 ? 1.0
-                                   :lid_type == 3 ? 1.0
-                                   :lid_type == 4 ? 1.0
-                                   :lid_type == 5 ? 2.0
-                                   : 1.0);
-
-function calc_coinslot_wall_offset_multiplier_y() = (
-                                    lid_type == 1 ? 0.5
-                                   :lid_type == 2 ? 0.5
-                                   :lid_type == 3 ? 1.0
-                                   :lid_type == 4 ? 0.5
-                                   :lid_type == 5 ? 2.0
-                                   : 1.0);
-
 /*** More complex module that iterates through complex_box to create many boxes. ***/
 module make_complex_box() {
     intersection() {     
