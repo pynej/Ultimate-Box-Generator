@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.6.2");
+echo("Built using Ultimate Box Generator v3.7.0");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
