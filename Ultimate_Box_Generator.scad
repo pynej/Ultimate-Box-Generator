@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.7.0");
+echo("Built using Ultimate Box Generator v3.7.1");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
@@ -582,7 +582,7 @@ module make_box() {
 /*** Code to add text to a box wall.  ***/
 module make_text(box_x, box_y, box_z, base_rotation, rotate_z) {
     if(text_type == 1 || text_type == 2) {
-        rotate([rotate_z ? base_rotation : 0, rotate_z ? 0 : text_rotation, rotate_z ? text_rotation : base_rotation])
+        rotate([rotate_z ? base_rotation : 0, 0, rotate_z ? text_rotation : base_rotation])
         translate([0, 0, text_offset])
         rotate([90, 0, 0])
         union() {
@@ -617,7 +617,7 @@ module make_text(box_x, box_y, box_z, base_rotation, rotate_z) {
         
             linear_extrude(text_depth + (text_type == 1 ? .05 : 0), convexity=2)
             intersection() {
-                square([calc_rotation(text_rotation, box_x, box_z) - wall*2, calc_rotation(text_rotation, box_z, box_x) - wall*2], center=true);
+                square([calc_rotation(rotate_z ? text_rotation : 0, box_x, box_z) - wall*2, calc_rotation(rotate_z ? text_rotation : 0, box_z, box_x) - wall*2], center=true);
                 
                 if(len(text_message[0]) > 1) {
                     translate([0,   (len(text_message) -1) * (text_size + 2) / 2])
