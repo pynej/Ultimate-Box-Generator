@@ -1,4 +1,4 @@
-echo("Built using Ultimate Box Generator v3.7.1");
+echo("Built using Ultimate Box Generator v3.8.0");
 
 // Parts to render. To do more complex opperations disable these and manually call make_box() and make_lid() instead.
 show_box=true;	// Whether or not to render the box
@@ -87,13 +87,14 @@ lid_alt_offset=false; // Move lid in X instead of Y for printing.
 // 2: Hexegon bottom frame. (To make this shape perfect set `comp_size_deep` to the width between to edges of the tile and set `comp_size_x` or `comp_size_y` to this this: `comp_size_deep / sqrt(3)*2`.
 // 3: Rough bottom for make bits sit unevenly. (Partial)
 // 4: Verical rounding on cordner. Set `internal_size_deep` to `comp_size_deep` and `internal_size_circle` to the shortest `comp_size` for a circle.
-// 5: Vertical hexegon. Retulst may varry.
+// 5: Vertical hexegon. Results may varry.
 internal_type=0; // Internal structure, see above.
 internal_rotate=false; // On lid axis or rotate to opposite.
 internal_size_deep=comp_size_deep/2; // How far into the box to start the internal structure. Should be `comp_size_deep/2` for type 1-2, `wall` for 3, or comp_size_deep for type 4-5.
 internal_size_circle=internal_type==1 ? internal_size_deep : internal_size_deep * 2 / sqrt(3); // Use this calculation, or the shorter comp_size for type 4-5.
 internal_fn=internal_type==1 || internal_type==4 ? 60 : 6; // Complexity of internal curves, may need to increase for larger or smoother curves.
 internal_wall=wall; // Custom size for internal walls.
+internal_wall_deep=comp_size_deep; // If set to lower then comp_size_deep then the internal walls will be this tall.
 
 // Text Settings
 // 0: None.
@@ -369,6 +370,10 @@ module make_box() {
             make_supress_wall(box_z, box_y, box_x,  supress_sides_offset[1] == undef ? supress_sides_offset : supress_sides_offset[1], supress_sides_offset[2] == undef ? supress_sides_offset : supress_sides_offset[2]);
         }
         
+        if(internal_wall_deep < comp_size_deep && (repeat_y > 1 || repeat_x > 1)) {
+            translate([wall, wall, wall + internal_wall_deep + (lid_type == 4 ? extra_bottom : 0)])
+            cube([box_x - wall * 2, box_y - wall * 2, comp_size_deep - internal_wall_deep]);
+        }
 
         for ( ybox = [ 0 : repeat_y - 1])
         {
@@ -576,7 +581,7 @@ module make_box() {
 
     }
     
-    make_box_internal(comp_size_x=comp_size_x, comp_size_y=comp_size_y, internal_size_deep=internal_size_deep, internal_type=internal_type, repeat_x=repeat_x, repeat_y=repeat_y, internal_fn=internal_fn, internal_rotate=internal_rotate, wall=wall, internal_wall=internal_wall);
+    make_box_internal(comp_size_x=comp_size_x, comp_size_y=comp_size_y, internal_size_deep=internal_size_deep, internal_type=internal_type, repeat_x=repeat_x, repeat_y=repeat_y, internal_fn=internal_fn, internal_rotate=internal_rotate, wall=wall, internal_wall=internal_wall, internal_wall_deep=internal_wall_deep);
 }
 
 /*** Code to add text to a box wall.  ***/

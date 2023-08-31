@@ -103,6 +103,7 @@ show_lid=true;	// Whether or not to render the lid. To make open boxes with no l
 //internal_size_circle=internal_type==1 ? internal_size_deep : internal_size_deep * 2 / sqrt(3); // Use this calculation, or the shorter comp_size for type 4-5.
 //internal_fn=internal_type==1 || internal_type==4 ? 60 : 6; // Complexity of internal curves, may need to increase for larger or smoother curves.
 //internal_wall=wall; // Custom size for internal walls.
+//internal_wall_deep=comp_size_deep; // If set to lower then comp_size_deep then the internal walls will be this tall.
 
 // Text Settings
 // 0: None.
