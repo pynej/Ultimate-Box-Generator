@@ -5,7 +5,7 @@ This is the repo for the Ultimate Box Generator on Thingiverse
 
 ## Getting Started
 
-This is a OpenSCAD script for generating configurable boxes. You will need to download OpenSCAD and install it. Then you will be able to open these files and create custom models. In OPenSCAD you can preview the files as you make changes. To generate a STL file you can print Render the model first then click the Export as STL link. 
+This is a OpenSCAD script for generating configurable boxes. You will need to download OpenSCAD and install it. Then you will be able to open these files and create custom models. In OpenSCAD you can preview the files as you make changes. To generate a STL file need to Render the model first then click the Export as STL to save the printable model. 
 
 Note that it is possible to generate items that won't actualy be printable with this tool.
 
