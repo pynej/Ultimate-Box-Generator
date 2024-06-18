@@ -60,10 +60,11 @@ mesh_overflow=0; // Extra rows to add to the mesh. For example in the Honeycomb 
 // Lid Settings
 // 0: No Lid. top may be rounded and can cause other rendering changes.
 // 1: Lid that slides off in the x direction.
-// 2: Lid with a snapped in hinge that rotates open
+// 2: Lid with a snapped in hinge that rotates open, will make box one wlal taller.
 // 3: Lid that snaps down onto the box. Also need to change lid_height to around 1.5mm.
-// 4: Stackable version of cover 1 there boxes slide into one another. You will need one cover for the last box. (Not tested)
+// 4: Stackable version of cover 1 there boxes slide into one another. You will need one cover for the last box.
 // 5: Oversized lid sits on top and has sides that extend down. (Needs snapp support)
+// 6: Stacking boxes, will make box 1/2 wall taller.
 lid_type=1; // Lid type, see above.
 has_thumbhole=true; // Add gripping locations for easy opening.
 has_coinslot=false; // Add slot in the top for dropping in components.
@@ -318,7 +319,7 @@ module make_supress_wall(box_z, box_x, box_y, supress_sides_offset_x, supress_si
 
 /*** The main code that created a simple box. ***/
 module make_box() {
-    totalheight = lid_type == 1 || lid_type == 2 ? comp_size_deep + wall : ( lid_type == 4 ? comp_size_deep + wall + extra_bottom : comp_size_deep);
+    totalheight = lid_type == 1 || lid_type == 2 ? comp_size_deep + wall : ( lid_type == 4 ? comp_size_deep + wall + extra_bottom : ( lid_type == 6 ? comp_size_deep + wall/2 : comp_size_deep ));
     
     box_z = totalheight + wall;
     box_x = calc_size(repeat_x, comp_size_x, internal_wall=internal_wall, wall=wall);
@@ -334,7 +335,7 @@ module make_box() {
                     cube([
                         box_x - (box_corner_radius_axis == true || box_corner_radius_axis[1] || box_corner_radius_axis[2] ? box_corner_radius*2 : 0), 
                         box_y - (box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[2] ? box_corner_radius*2 : 0), 
-                        box_z - (box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[1] ? box_corner_radius*2 : 0) + (lid_type==5 || lid_type==3 ? wall : 0)
+                        box_z - (box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[1] ? box_corner_radius*2 : 0) + (lid_type==5 || lid_type==3 || lid_type==6 ? wall : 0)
                     ]);
                     translate([
                         box_corner_radius_axis == true || box_corner_radius_axis[1] || box_corner_radius_axis[2] ? box_corner_radius : 0, 
@@ -507,10 +508,10 @@ module make_box() {
         
         if(lid_type==4) {
             difference() {
-                cube([box_x, box_y, wall]);
+                #cube([box_x, box_y, wall]);
             
                 translate([0,wall/2+tolerance,0])
-                union() {
+               union() {
                     //Slide
                     rotate([90,0,90])
                     linear_extrude(box_x - wall/2)
@@ -536,6 +537,62 @@ module make_box() {
                 }
             }
         }
+        
+        if(lid_type==6) {
+            difference() {
+               cube([box_x, box_y, wall/2]);
+               translate([wall/2+tolerance, wall/2+tolerance, 0])
+               union() {
+                   intersection() {
+                        rotate([90,0,90])
+                        linear_extrude(box_x - wall - tolerance*2)
+                        polygon([
+                            [wall/2+tolerance*2, 0],
+                            [box_y-tolerance*2-wall*1.5, 0],
+                            [box_y-tolerance*2-wall,wall/2],
+                            [tolerance*2,wall/2],
+                        ]);
+                   
+                        rotate([-90,0,0])
+                        translate([0, -wall/2, 0])
+                        linear_extrude(box_y - wall)
+                        polygon([
+                            [tolerance*2, 0],
+                            [box_x-tolerance*2-wall, 0],
+                            [box_x-tolerance*2-wall*1.5,wall],
+                            [wall/2+tolerance*2,wall],
+                        ]);
+                   }
+                }
+            }
+            
+            difference() {
+                translate([wall/2, wall/2, box_z - wall/2])
+                union() {
+                   intersection() {
+                        rotate([90,0,90])
+                        linear_extrude(box_x - wall)
+                        polygon([
+                            [wall/2, 0],
+                            [box_y-wall*1.5, 0],
+                            [box_y-wall,wall/2],
+                            [0,wall/2],
+                        ]);
+                   
+                        rotate([-90,0,0])
+                        translate([0, -wall/2, 0])
+                        linear_extrude(box_y - wall)
+                        polygon([
+                            [0, 0],
+                            [box_x-wall, 0],
+                            [box_x-wall*1.5,wall/2],
+                            [wall/2,wall/2],
+                        ]);
+                    }
+                }
+            }
+        }
+        
         
         if(text_type == 1) {
             if(text_sides == true || text_sides[0] == true) 
@@ -593,7 +650,7 @@ module make_text(box_x, box_y, box_z, base_rotation, rotate_z) {
         union() {
             // Add a backdrop behind the raised text.
             if(text_type == 2 && mesh_type > 0) {
-                translate([0, 0, rotate_z && (lid_type==3 || lid_type==5) ? text_depth : -wall])
+                translate([0, 0, rotate_z && (lid_type==3 || lid_type==5 || lid_type==6) ? text_depth : -wall])
                 linear_extrude(wall)
                 intersection() {
                     square([calc_rotation(text_rotation, box_x, box_z) - wall*2, calc_rotation(text_rotation, box_z, box_x) - wall*2], center=true);
@@ -754,7 +811,7 @@ module make_lid() {
     box_z = totalheight + wall;
     
     if(lid_type != 0) {
-        echo("Lid created: ", box_x, box_y, lid_type == 5 || lid_type == 3 ? lid_height : wall);
+        echo("Lid created: ", box_x, box_y, lid_type == 5 || lid_type == 3 || lid_type==6 ? lid_height : wall);
         
         //translate([lid_type==5 ? -wall - tolerance : 0, lid_type==5 ? - wall - tolerance : wall/2+tolerance, lid_type == 5 ? 0 : ( comp_size_deep+wall + (lid_type == 4 ? extra_bottom : 0))])
         translate ([lid_alt_offset ? box_x+lid_offset : 0, lid_alt_offset ? 0 : box_y+lid_offset,0])
@@ -869,7 +926,7 @@ module make_lid() {
                             make_lid_mesh(wall, wall/2, internal_wall=internal_wall, wall=wall, box_x=box_x, box_y=box_y, comp_size_x=comp_size_x, comp_size_y=comp_size_y, mesh_type=mesh_type);
                         }
                     }
-                    if(lid_type == 5) {
+                    if(lid_type==5) {
                         difference() {
                             cube ([box_x + 2*wall + 2*tolerance, box_y + 2*wall + 2*tolerance, lid_height]);
 
@@ -889,7 +946,7 @@ module make_lid() {
                             make_lid_mesh(wall + tolerance + wall, wall*2 + tolerance, internal_wall=internal_wall, wall=wall, box_x=box_x, box_y=box_y, comp_size_x=comp_size_x, comp_size_y=comp_size_y, mesh_type=mesh_type);
                         }
                     } 
-                    if(lid_type==3) {        
+                    if(lid_type==3 ) { 
                         difference () {
                             cube([box_x + 2*tolerance, box_y + 2*tolerance, wall]);
                             make_lid_mesh(wall, wall, internal_wall=internal_wall, wall=wall, box_x=box_x, box_y=box_y, comp_size_x=comp_size_x, comp_size_y=comp_size_y, mesh_type=mesh_type);
@@ -921,12 +978,48 @@ module make_lid() {
                             }
                         }
                     }
+                    if(lid_type==6 ) { 
+                        difference () {
+                            cube([box_x + 2*tolerance, box_y + 2*tolerance, wall]);
+                            make_lid_mesh(wall, wall, internal_wall=internal_wall, wall=wall, box_x=box_x, box_y=box_y, comp_size_x=comp_size_x, comp_size_y=comp_size_y, mesh_type=mesh_type);
+                        }
+                        lip = min(mesh_inset_padding, wall*2/3);
+                        
+                       
+                        translate([ 0, 0, wall])
+                        difference() {
+                            translate([wall/2+tolerance, wall/2+tolerance, 0])
+                            union() {
+                               intersection() {
+                                    rotate([90,0,90])
+                                    linear_extrude(box_x - wall  - tolerance*2)
+                                    polygon([
+                                        [wall/2+tolerance*2, wall/2],
+                                        [box_y-tolerance*2-wall*1.5, wall/2],
+                                        [box_y-tolerance*2-wall,0],
+                                        [tolerance*2,0],
+                                    ]);
+                               
+                                    rotate([-90,0,0])
+                                    translate([0, -wall/2, 0])
+                                    linear_extrude(box_y - wall)
+                                    polygon([
+                                        [tolerance*2, wall/2],
+                                        [box_x-tolerance*2-wall, wall/2],
+                                        [box_x-tolerance*2-wall*1.5,0],
+                                        [wall/2+tolerance*2,0],
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                    
                     
                 } // union
                 
                 if(text_top == true && text_type == 1) {
-                    mirror([lid_type==3 || lid_type==5 ? 1 : 0, 0, 0])
-                    translate([lid_type==3 || lid_type==5 ? -comp_size_x - wall*2 : 0, lid_type==3 || lid_type==5 ? wall/2 : 0, lid_type==3 || lid_type==5 ? -wall + text_depth - .025 : 0])
+                    mirror([lid_type==3 || lid_type==5 || lid_type==6 ? 1 : 0, 0, 0])
+                    translate([lid_type==3 || lid_type==5 || lid_type==6 ? -comp_size_x - wall*2 : 0, lid_type==3 || lid_type==5 || lid_type==6 ? wall/2 : 0, lid_type==3 || lid_type==5 || lid_type==6 ? -wall + text_depth - .025 : 0])
                     if(text_message_compartments == false || text_message_compartments == undef)
                         translate([lid_type == 5 ? -wall - tolerance : 0, lid_type == 5  ? wall + tolerance : 0, lid_type == 4 ? extra_bottom : 0])
                         translate([box_x/2, box_y/2 - wall/2, wall - text_depth])
@@ -956,7 +1049,7 @@ module make_lid() {
                                 offset_x=calc_offset(xslot, comp_size_x, internal_wall=internal_wall, wall=wall);
                                 offset_y=calc_offset(yslot, comp_size_y, internal_wall=internal_wall, wall=wall);
                             
-                            translate([lid_type == 5 ? wall + tolerance : -tolerance,  lid_type == 5  ? wall + tolerance : (lid_type != 3 ? -wall/2-tolerance : tolerance) , lid_type == 4 ? extra_bottom : 0])
+                            translate([lid_type == 5 ? wall + tolerance : -tolerance,  lid_type == 5  ? wall + tolerance : (lid_type != 3 && lid_type!=6 ? -wall/2-tolerance : tolerance) , lid_type == 4 ? extra_bottom : 0])
                             translate([ 
                             comp_size_x/2 + offset_x - (coinslot_x)/2,
                             comp_size_y/2 + offset_y -  (coinslot_y)/2, 
@@ -983,7 +1076,7 @@ module make_lid() {
             
             
             if(box_corner_radius > 0)
-                translate([0, 0, lid_type == 3 || lid_type == 5 ? 0 : -box_z + wall])
+                translate([0, 0, lid_type == 3 || lid_type == 5 || lid_type==6 ? 0 : -box_z + wall])
                 minkowski() {
                     cube([
                         box_x - (box_corner_radius_axis == true || box_corner_radius_axis[1] || box_corner_radius_axis[2] ? box_corner_radius*2 : 0) + (lid_type==5 ? 2*wall + 2*tolerance : 0), 
@@ -992,15 +1085,15 @@ module make_lid() {
                     ]);
                     translate([
                         box_corner_radius_axis == true || box_corner_radius_axis[1] || box_corner_radius_axis[2] ? box_corner_radius : 0, 
-                        (box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[2] ? box_corner_radius : 0) - (lid_type==5 || lid_type==3 ? 0 : wall/2), 
+                        (box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[2] ? box_corner_radius : 0) - (lid_type==5 || lid_type==3 || lid_type==6 ? 0 : wall/2), 
                         box_corner_radius_axis == true || box_corner_radius_axis[0] || box_corner_radius_axis[1] ? box_corner_radius : 0
                     ])
                     sphere(box_corner_radius, $fn=50);
                 }
         } //intersection
         if(text_top == true && text_type == 2) {
-                        mirror([lid_type==3 || lid_type==5 ? 1 : 0, 0, 0])
-                        translate([lid_type==3 || lid_type==5 ? -comp_size_x - wall*2 : 0, lid_type==3 || lid_type==5 ? wall/2 : 0, lid_type==3 || lid_type==5 ? -wall -text_depth*2 : -text_depth])
+                        mirror([lid_type==3 || lid_type==5 || lid_type==6 ? 1 : 0, 0, 0])
+                        translate([lid_type==3 || lid_type==5 || lid_type==6 ? -comp_size_x - wall*2 : 0, lid_type==3 || lid_type==5 || lid_type==6 ? wall/2 : 0, lid_type==3 || lid_type==5 || lid_type==6 ? -wall -text_depth*2 : -text_depth])
                         if(text_message_compartments == false || text_message_compartments == undef)
                             translate([lid_type == 5 ? -wall - tolerance : 0, lid_type == 5  ? wall + tolerance : 0, lid_type == 4 ? extra_bottom : 0])
                             translate([box_x/2, box_y/2 - wall/2, wall + text_depth])
