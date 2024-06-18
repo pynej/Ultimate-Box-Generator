@@ -73,6 +73,7 @@ show_lid=true;	// Whether or not to render the lid. To make open boxes with no l
 // 3: Lid that snaps down onto the box. Also need to change lid_height to around 1.5mm.
 // 4: Stackable version of cover 1 there boxes slide into one another. You will need one cover for the last box. (Not tested)
 // 5: Oversized lid sits on top and has sides that extend down. (Needs snapp support)
+// 6: Stacking boxes, will make box 1/2 wall taller.
 //lid_type=1; // Lid type, see above.
 //has_thumbhole=true; // Add gripping locations for easy opening.
 //has_coinslot=false; // Add slot in the top for dropping in components.
