@@ -835,16 +835,21 @@ module make_lid() {
                                 
                                 //Snaps
                                 if(has_snap) {
-                                    polyhedron([
-                                        [0, -snap_inset, 0],
-                                        [0, box_y - wall + snap_inset - tolerance*2, 0],
-                                        [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
-                                        [0, wall/2 - snap_inset, wall],
-                                        [1, -snap_inset/3, 0],
-                                        [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
-                                        [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
-                                        [1, wall/2 - snap_inset/3, wall],
-                                    ], CubeFaces);
+                                    if (lid_type_1_enhanced_snaps) {
+                                        translate([wall * 1.5, wall/2, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                        translate([wall * 1.5, wall/2 + comp_size_y, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                    } else {
+                                        polyhedron([
+                                            [0, -snap_inset, 0],
+                                            [0, box_y - wall + snap_inset - tolerance*2, 0],
+                                            [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
+                                            [0, wall/2 - snap_inset, wall],
+                                            [1, -snap_inset/3, 0],
+                                            [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
+                                            [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
+                                            [1, wall/2 - snap_inset/3, wall],
+                                        ], CubeFaces);
+                                    }
                                 }
                             }
                             
