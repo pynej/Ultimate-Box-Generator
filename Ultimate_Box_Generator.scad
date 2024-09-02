@@ -476,6 +476,10 @@ module make_box() {
         
             translate ([0,wall/2,totalheight-z_tolerance])
             cube ([box_x-wall/2, box_y-wall,z_tolerance],center=false);
+            if(lid_type_1_enhanced_snaps) {
+                translate([wall * 1.5, wall/2, totalheight + wall/2]) color("Black") sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, box_y - wall/2, totalheight + wall/2]) color("Tomato") sphere(wall/2, $fn=lid_fn);
+            }
         }
 
         if(lid_type==2) {
