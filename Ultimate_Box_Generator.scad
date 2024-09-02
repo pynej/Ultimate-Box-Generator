@@ -69,6 +69,7 @@ lid_type=1; // Lid type, see above.
 has_thumbhole=true; // Add gripping locations for easy opening.
 has_coinslot=false; // Add slot in the top for dropping in components.
 has_snap=true; // Add small ridges or snaps to lids to help keep them closed.
+lid_type_1_enhanced_snaps=true; // Add enhanced snaps to lid types 1 and 4.
 coinslot_x=20;	// Size in X direction
 coinslot_y=2.5;	// Size in Y direction
 coinslot_corner_radius=0; // rounded coinslot corners if >0; best if less than half the shorter coinslot dimension
