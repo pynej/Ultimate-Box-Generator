@@ -167,9 +167,9 @@ module make_complex_box() {
         translate([wall-internal_wall, wall-internal_wall, wall-internal_wall])
         //for(row = complex_box) {
             for(area = complex_box) {
-               translate(area[1])
-               color(area[5][0])
-               make_internal_box(area[0][0], area[0][1], area[0][2], wall=internal_wall, repeat_x=area[2][0], repeat_y=area[2][1]);
+                translate(area[1])
+                color(area[5][0])
+                make_internal_box(area[0][0], area[0][1], area[0][2], wall=internal_wall, repeat_x=area[2][0], repeat_y=area[2][1]);
             }
         //}
     }
@@ -184,7 +184,7 @@ module make_wall(row, offset, rotate, internal_size_deep=internal_size_deep, int
         cube([rotate ? comp_size_x : internal_wall, rotate ? internal_wall : comp_size_y, internal_size_deep]);
         rotate([rotate ? 90 : 0, rotate ? 0 : -90, 0])
         translate([mesh_inset_padding, mesh_inset_padding, - .5-internal_wall])
-	  make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, mesh_type=mesh_type, !rotate);
+	    make_mesh(rotate ? comp_size_x : internal_size_deep - wall*(lid_type==5?1:0), rotate ? internal_size_deep - wall*(lid_type==5?1:0) : comp_size_y, mesh_rotation, mesh_type=mesh_type, !rotate);
     }
 }
 
@@ -214,7 +214,7 @@ module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh
                     // Correct for rotated Y sides
                     translate([0,angle >= 90 ? y - strut_gap : 0, 0])
                     rotate([0, 0, angle >= 90 ? -90 : 0])
-             
+
                     for (i = [0 :  floor(no_x)]) {
                         translate([i * pos_x, (i % 2) * pos_y, 0])
                         for (r = [0 :  floor(no_y_extra <= .5 && i % 2 ? no_y - 1 : no_y )  ]) {
@@ -228,7 +228,7 @@ module make_struts (x, y, thickness, number_of_struts, struts_width, angle, mesh
                 // Line Mesh
                 intersection(){
                     square([x,y]);
-              
+
                     if (angle2 <= 90 && angle >=0) {
                         cosa = x/hypotenuse;
                         for ( i = [1 : number_of_struts] ) {
@@ -511,7 +511,7 @@ module make_box() {
                 #cube([box_x, box_y, wall]);
             
                 translate([0,wall/2+tolerance,0])
-               union() {
+                union() {
                     //Slide
                     rotate([90,0,90])
                     linear_extrude(box_x - wall/2)
@@ -540,10 +540,10 @@ module make_box() {
         
         if(lid_type==6) {
             difference() {
-               cube([box_x, box_y, wall/2]);
-               translate([wall/2+tolerance, wall/2+tolerance, 0])
-               union() {
-                   intersection() {
+                cube([box_x, box_y, wall/2]);
+                translate([wall/2+tolerance, wall/2+tolerance, 0])
+                union() {
+                    intersection() {
                         rotate([90,0,90])
                         linear_extrude(box_x - wall - tolerance*2)
                         polygon([
@@ -552,7 +552,7 @@ module make_box() {
                             [box_y-tolerance*2-wall,wall/2],
                             [tolerance*2,wall/2],
                         ]);
-                   
+
                         rotate([-90,0,0])
                         translate([0, -wall/2, 0])
                         linear_extrude(box_y - wall)
@@ -562,14 +562,14 @@ module make_box() {
                             [box_x-tolerance*2-wall*1.5,wall],
                             [wall/2+tolerance*2,wall],
                         ]);
-                   }
+                    }
                 }
             }
             
             difference() {
                 translate([wall/2, wall/2, box_z - wall/2])
                 union() {
-                   intersection() {
+                    intersection() {
                         rotate([90,0,90])
                         linear_extrude(box_x - wall)
                         polygon([
@@ -578,7 +578,7 @@ module make_box() {
                             [box_y-wall,wall/2],
                             [0,wall/2],
                         ]);
-                   
+
                         rotate([-90,0,0])
                         translate([0, -wall/2, 0])
                         linear_extrude(box_y - wall)
@@ -665,7 +665,7 @@ module make_text(box_x, box_y, box_z, base_rotation, rotate_z) {
                                     square([text_size*len(text_message[i])*text_backdrop_scale[0] - text_size, text_size*text_backdrop_scale[1] - text_size]);
                                     circle(text_size/2, $fn=20);
                                 }
-                          }
+                        }
                     } else {
                         translate([-text_size*len(text_message)*text_backdrop_scale[0]/2 +text_size/2, -text_size*text_backdrop_scale[1]/2 + text_size/2])
                         minkowski() {
@@ -686,7 +686,7 @@ module make_text(box_x, box_y, box_z, base_rotation, rotate_z) {
                     union(){
                         for (i = [0 : len(text_message) - 1])
                           translate([0 , -i * (text_size + 2) , 0 ]) text(text_message[i], font = text_font, size = text_size, valign = "center", halign = "center", $fn=text_fn);
-                      }
+                    }
                 } else {
                     text(text = str(text_message), font = text_font, size = text_size, valign = "center", halign = "center", $fn=text_fn);
                 }
@@ -704,7 +704,7 @@ module make_internal_box(comp_size_x, comp_size_y, comp_size_z) {
     union() {
         translate([0, 0, internal_grow_down && comp_size_z < comp_size_deep ? comp_size_deep - comp_size_z : 0])
         make_box(comp_size_x=comp_size_x, comp_size_y=comp_size_y, comp_size_deep=comp_size_z, mesh_do_sides=mesh_do_interior, wall=internal_wall, internal_wall=internal_wall, repeat_x=repeat_x, repeat_y=repeat_y, mesh_type=mesh_type, internal_type=internal_type, internal_size_deep=internal_size_deep, internal_fn=internal_fn, internal_rotate=internal_rotate);
-         
+
         if(internal_grow_down && comp_size_deep - comp_size_z > 0 && !internal_empty_bottom) {
             cube([box_x, box_y, comp_size_deep - comp_size_z]);
         }
@@ -740,8 +740,8 @@ module make_box_internal(comp_size_x=comp_size_x, comp_size_y=comp_size_y, inter
                                 rotate([0,0,90])
                             if(!internal_rotate && supress_walls_x[ybox][xbox] || internal_rotate && supress_walls_y[xbox][ybox])
                                 square([internal_size_circle*2, internal_size_circle*2], center=true);
-                             else
-                                 circle(r=internal_size_circle, $fn=internal_fn);
+                            else
+                                circle(r=internal_size_circle, $fn=internal_fn);
                         }
                     }
                 }
@@ -891,7 +891,7 @@ module make_lid() {
                                         cube (size=[20,box_y,wall+.1], center=false);
                                     }
                                 }
-                     
+
                                 if(lid_type==2) {
                                     rotate([0, 90, 0])
                                     translate([-wall, wall*2, -.01])
@@ -985,12 +985,12 @@ module make_lid() {
                         }
                         lip = min(mesh_inset_padding, wall*2/3);
                         
-                       
+
                         translate([ 0, 0, wall])
                         difference() {
                             translate([wall/2+tolerance, wall/2+tolerance, 0])
                             union() {
-                               intersection() {
+                                intersection() {
                                     rotate([90,0,90])
                                     linear_extrude(box_x - wall  - tolerance*2)
                                     polygon([
@@ -999,7 +999,7 @@ module make_lid() {
                                         [box_y-tolerance*2-wall,0],
                                         [tolerance*2,0],
                                     ]);
-                               
+
                                     rotate([-90,0,0])
                                     translate([0, -wall/2, 0])
                                     linear_extrude(box_y - wall)
@@ -1024,7 +1024,7 @@ module make_lid() {
                         translate([lid_type == 5 ? -wall - tolerance : 0, lid_type == 5  ? wall + tolerance : 0, lid_type == 4 ? extra_bottom : 0])
                         translate([box_x/2, box_y/2 - wall/2, wall - text_depth])
                         make_text(box_x, box_z, box_y, -90, true);
-                     else
+                    else
                         for ( ybox = [ 0 : repeat_y - 1])
                         {
                             for( xbox = [ 0 : repeat_x - 1])
@@ -1058,14 +1058,14 @@ module make_lid() {
                                     cube ( size = [ coinslot_x, coinslot_y, wall + oversize*2]);
                                     if (coinslot_corner_radius > 0) {
                                         hull() {
-                                           translate([coinslot_corner_radius, coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
-                                           translate([coinslot_x - coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
-                                           translate([coinslot_x - coinslot_corner_radius, coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
-                                           translate([coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
-                                               cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                            translate([coinslot_corner_radius, coinslot_corner_radius, 0])
+                                                cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                            translate([coinslot_x - coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                                cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                            translate([coinslot_x - coinslot_corner_radius, coinslot_corner_radius, 0])
+                                                cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
+                                            translate([coinslot_corner_radius, coinslot_y - coinslot_corner_radius, 0])
+                                                cylinder(h=wall+oversize*2, r=coinslot_corner_radius, $fn=40);
                                         }
                                     }
                                 }
