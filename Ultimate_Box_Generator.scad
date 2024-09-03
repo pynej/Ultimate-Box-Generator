@@ -516,7 +516,7 @@ module make_box() {
         
         if(lid_type==4) {
             difference() {
-                #cube([box_x, box_y, wall]);
+                cube([box_x, box_y, wall]);
             
                 translate([0,wall/2+tolerance,0])
                 union() {
