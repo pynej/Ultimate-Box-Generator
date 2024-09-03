@@ -121,6 +121,9 @@ make_complex_box=false; // Use an array of objects from `complex_box` to create 
 internal_grow_down=true; // If set compartments will be extruded into the larger box from the top to make a flush surface. (May result in a model that uses a lot of material).
 internal_empty_bottom=false; // If set the area blow each box will be empty. This will not be printable on a FDM printer unless supports are included internally but still may save material and print time.
 
+// Prevent z-fighting
+epsilon = 0.01;
+
 // Main Program
 if (show_box) {
     make_box();
@@ -330,7 +333,7 @@ module make_box() {
     
     difference() {
         intersection() {    
-            cube ( size = [box_x, box_y, box_z], center = false);
+            cube ( size = [box_x, box_y, box_z - epsilon], center = false);
             if(box_corner_radius > 0)
                 minkowski() {
                     cube([
@@ -477,8 +480,8 @@ module make_box() {
             translate ([0,wall/2,totalheight-z_tolerance])
             cube ([box_x-wall/2, box_y-wall,z_tolerance],center=false);
             if(lid_type_1_enhanced_snaps) {
-                translate([wall * 1.5, wall, totalheight + wall/2]) color("Black") sphere(wall/2, $fn=lid_fn);
-                translate([wall * 1.5, box_y - wall, totalheight + wall/2]) color("Tomato") sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, box_y - wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
             }
         }
 
