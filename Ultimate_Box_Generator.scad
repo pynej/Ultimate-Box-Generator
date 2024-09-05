@@ -69,6 +69,7 @@ lid_type=1; // Lid type, see above.
 has_thumbhole=true; // Add gripping locations for easy opening.
 has_coinslot=false; // Add slot in the top for dropping in components.
 has_snap=true; // Add small ridges or snaps to lids to help keep them closed.
+lid_type_1_enhanced_snaps=false; // Add enhanced snaps to lid types 1 and 4.
 coinslot_x=20;	// Size in X direction
 coinslot_y=2.5;	// Size in Y direction
 coinslot_corner_radius=0; // rounded coinslot corners if >0; best if less than half the shorter coinslot dimension
@@ -119,6 +120,9 @@ text_backdrop_scale=[.9, 1.5]; // Font size scaling used on the backdrop when `t
 make_complex_box=false; // Use an array of objects from `complex_box` to create many smaller boxes within the larger box.
 internal_grow_down=true; // If set compartments will be extruded into the larger box from the top to make a flush surface. (May result in a model that uses a lot of material).
 internal_empty_bottom=false; // If set the area blow each box will be empty. This will not be printable on a FDM printer unless supports are included internally but still may save material and print time.
+
+// Prevent z-fighting
+epsilon = 0.01;
 
 // Main Program
 if (show_box) {
@@ -329,7 +333,7 @@ module make_box() {
     
     difference() {
         intersection() {    
-            cube ( size = [box_x, box_y, box_z], center = false);
+            cube ( size = [box_x, box_y, box_z - epsilon], center = false);
             if(box_corner_radius > 0)
                 minkowski() {
                     cube([
@@ -475,6 +479,10 @@ module make_box() {
         
             translate ([0,wall/2,totalheight-z_tolerance])
             cube ([box_x-wall/2, box_y-wall,z_tolerance],center=false);
+            if(lid_type_1_enhanced_snaps) {
+                translate([wall * 1.5, wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, box_y - wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
+            }
         }
 
         if(lid_type==2) {
@@ -508,7 +516,7 @@ module make_box() {
         
         if(lid_type==4) {
             difference() {
-                #cube([box_x, box_y, wall]);
+                cube([box_x, box_y, wall]);
             
                 translate([0,wall/2+tolerance,0])
                 union() {
@@ -523,16 +531,21 @@ module make_box() {
                     ]);
                     //Snaps
                     if(has_snap) {
-                        polyhedron([
-                            [0, -snap_inset, 0],
-                            [0, box_y - wall + snap_inset - tolerance*2, 0],
-                            [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
-                            [0, wall/2 - snap_inset, wall],
-                            [1, -snap_inset/3, 0],
-                            [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
-                            [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
-                            [1, wall/2 - snap_inset/3, wall],
-                        ], CubeFaces);
+                        if (lid_type_1_enhanced_snaps) {
+                            translate([wall * 1.5, wall/2, wall/2]) sphere(wall/2, $fn=lid_fn);
+                            translate([wall * 1.5, wall/2 + comp_size_y, wall/2]) sphere(wall/2, $fn=lid_fn);
+                        } else {
+                            polyhedron([
+                                [0, -snap_inset, 0],
+                                [0, box_y - wall + snap_inset - tolerance*2, 0],
+                                [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
+                                [0, wall/2 - snap_inset, wall],
+                                [1, -snap_inset/3, 0],
+                                [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
+                                [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
+                                [1, wall/2 - snap_inset/3, wall],
+                            ], CubeFaces);
+                        }
                     }
                 }
             }
@@ -834,16 +847,21 @@ module make_lid() {
                                 
                                 //Snaps
                                 if(has_snap) {
-                                    polyhedron([
-                                        [0, -snap_inset, 0],
-                                        [0, box_y - wall + snap_inset - tolerance*2, 0],
-                                        [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
-                                        [0, wall/2 - snap_inset, wall],
-                                        [1, -snap_inset/3, 0],
-                                        [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
-                                        [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
-                                        [1, wall/2 - snap_inset/3, wall],
-                                    ], CubeFaces);
+                                    if (lid_type_1_enhanced_snaps) {
+                                        translate([wall * 1.5, wall/2, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                        translate([wall * 1.5, wall/2 + comp_size_y, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                    } else {
+                                        polyhedron([
+                                            [0, -snap_inset, 0],
+                                            [0, box_y - wall + snap_inset - tolerance*2, 0],
+                                            [0, box_y - wall*1.5 + snap_inset - tolerance*2, wall],
+                                            [0, wall/2 - snap_inset, wall],
+                                            [1, -snap_inset/3, 0],
+                                            [1, box_y - wall + snap_inset/3 - tolerance*2, 0],
+                                            [1, box_y - wall*1.5 + snap_inset/3 - tolerance*2, wall],
+                                            [1, wall/2 - snap_inset/3, wall],
+                                        ], CubeFaces);
+                                    }
                                 }
                             }
                             
