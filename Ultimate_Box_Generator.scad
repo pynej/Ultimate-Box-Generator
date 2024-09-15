@@ -70,6 +70,7 @@ has_thumbhole=true; // Add gripping locations for easy opening.
 has_coinslot=false; // Add slot in the top for dropping in components.
 has_snap=true; // Add small ridges or snaps to lids to help keep them closed.
 lid_type_1_enhanced_snaps=false; // Add enhanced snaps to lid types 1 and 4.
+lid_type_1_enhanced_snaps_protrusion_factor = 0.63; // Shift the enhanced snaps to the left or right. Higher values make it more lose, lower values make it tighter but risk the side-walls of the box breaking off. You probably want this to be between 0.55 and 0.67.
 coinslot_x=20;	// Size in X direction
 coinslot_y=2.5;	// Size in Y direction
 coinslot_corner_radius=0; // rounded coinslot corners if >0; best if less than half the shorter coinslot dimension
@@ -480,8 +481,8 @@ module make_box() {
             translate ([0,wall/2,totalheight-z_tolerance])
             cube ([box_x-wall/2, box_y-wall,z_tolerance],center=false);
             if(lid_type_1_enhanced_snaps) {
-                translate([wall * 1.5, wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
-                translate([wall * 1.5, box_y - wall, totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, wall * (0.5 + lid_type_1_enhanced_snaps_protrusion_factor), totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
+                translate([wall * 1.5, box_y - wall * (0.5 + lid_type_1_enhanced_snaps_protrusion_factor), totalheight + wall/2]) sphere(wall/2, $fn=lid_fn);
             }
         }
 
@@ -532,8 +533,8 @@ module make_box() {
                     //Snaps
                     if(has_snap) {
                         if (lid_type_1_enhanced_snaps) {
-                            translate([wall * 1.5, wall/2, wall/2]) sphere(wall/2, $fn=lid_fn);
-                            translate([wall * 1.5, wall/2 + comp_size_y, wall/2]) sphere(wall/2, $fn=lid_fn);
+                            translate([wall * 1.5, wall * lid_type_1_enhanced_snaps_protrusion_factor, wall/2]) sphere(wall/2, $fn=lid_fn);
+                            translate([wall * 1.5, box_y - 2*tolerance - wall - wall * lid_type_1_enhanced_snaps_protrusion_factor, wall/2]) sphere(wall/2, $fn=lid_fn);
                         } else {
                             polyhedron([
                                 [0, -snap_inset, 0],
@@ -848,8 +849,8 @@ module make_lid() {
                                 //Snaps
                                 if(has_snap) {
                                     if (lid_type_1_enhanced_snaps) {
-                                        translate([wall * 1.5, wall/2, wall/2]) sphere(wall/2, $fn=lid_fn);
-                                        translate([wall * 1.5, wall/2 + comp_size_y, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                        translate([wall * 1.5, wall * lid_type_1_enhanced_snaps_protrusion_factor, wall/2]) sphere(wall/2, $fn=lid_fn);
+                                        translate([wall * 1.5, box_y - 2*tolerance - wall - wall * lid_type_1_enhanced_snaps_protrusion_factor, wall/2]) sphere(wall/2, $fn=lid_fn);
                                     } else {
                                         polyhedron([
                                             [0, -snap_inset, 0],
